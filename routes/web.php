@@ -26,4 +26,5 @@ $router->get('/users', ['middleware' => 'jwt.auth', function () {
         "data" => $user
     ]);
 }]);
+$router->get('/me', ['middleware' => 'jwt.auth', 'uses' => 'AuthController@me']);
 $router->post('/login', 'AuthController@authenticate');

@@ -7,6 +7,7 @@ use Closure;
 use Exception;
 use Firebase\JWT\JWT;
 use Firebase\JWT\ExpiredException;
+use Firebase\JWT\Key;
 
 class JWTMiddleware
 {
@@ -19,7 +20,7 @@ class JWTMiddleware
      */
     public function handle($request, Closure $next)
     {
-        $token = $request->input("token");
+        $token = $request->header("token");
         if (!$token) {
             return \response()->json(
                 [
@@ -30,22 +31,21 @@ class JWTMiddleware
             );
         }
         try {
-            $credentials = JWT::decode($token, env('JWT_SECRET', 'iniceritanyastringrandom'), ['HS256']);
+            $credentials = JWT::decode($token, new Key(\env('JWT_SECRET', 'iniceritanyastringrandom'), 'HS256'));
         } catch (\ExpiredException $th) {
             return response()->json([
                 'message' => "Unauthorized",
                 'error' => "token expired",
             ], 400);
         } catch (Exception $e) {
-            //
             return response()->json([
                 "error" => "An error while decoding token.",
             ], 400);
-
-            $user = User::find($credentials->id);
-
-            $request->auth = $user;
         }
+
+        $user = User::find($credentials->sub);
+
+        $request->auth = $user;
         return $next($request);
     }
 }
