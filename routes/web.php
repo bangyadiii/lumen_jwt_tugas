@@ -22,7 +22,7 @@ $router->get('/', function () use ($router) {
 
 $router->get('/users', ['middleware' => 'jwt.auth', function () {
     $user = User::all();
-    response()->json([
+    return response()->json([
         "data" => $user
     ]);
 }]);
